@@ -2,10 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using Gpt4All.Samples;
 
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager Instance { get; set; }
+    // Add llmSO
+    [SerializeField] LlmSO llmSO;
+    [SerializeField] ChatSample chatSample;
     private bool[,] allowedMoves { get; set; }
 
     private const float TILE_SIZE = 1.0f;
@@ -99,8 +104,21 @@ public class BoardManager : MonoBehaviour
 
     private bool calculateVictory()
     {
-        var rng = new System.Random();
-        return rng.Next(0, 100) < 50;
+        // We neeed to calculate the victory using procedural 
+        // implement mock static strings 
+        var result = "";
+        var rng = new System.Random().Next(0, 100);
+        if (rng < 50)
+        {
+            // display outcome message on ui
+            result = llmSO.GetOutcome(0);
+            chatSample.UpdateOutputHandler($"low chance of losing: {rng}% : {result}");
+        }else{
+            // display outcome message on ui
+            result = llmSO.GetOutcome(1);
+            chatSample.UpdateOutputHandler($"high chance of losing: {rng}% : {result}");
+        }
+        return rng < 50;
     }
 
     private void MoveChessman(int x, int y)
@@ -109,19 +127,22 @@ public class BoardManager : MonoBehaviour
         {
             Chessman c = Chessmans[x, y];
             var victory = true;
-
             if (c != null && c.isWhite != isWhiteTurn)
             {
+                // update prompt
+                var prompt = $"{selectedChessman.gameObject.name} attacks {c.gameObject.name}";
+                chatSample.UpdatePrompt(prompt);
                 // Capture a piece
-
                 if (c.GetType() == typeof(King))
                 {
                     // End the game
                     EndGame();
                     return;
                 }
+                
 
                 victory = calculateVictory();
+                Debug.Log($"Victory: {victory}");
                 if (victory)
                 {
                     activeChessman.Remove(c.gameObject);

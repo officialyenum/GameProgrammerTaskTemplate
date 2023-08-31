@@ -22,6 +22,7 @@ namespace Gpt4All.Samples
             manager.OnResponseUpdated += OnResponseHandler;
         }
 
+
         private void OnSubmit(string prompt)
         {
             if (!Input.GetKey(KeyCode.Return))
@@ -40,16 +41,31 @@ namespace Gpt4All.Samples
                 return;
 
             input.text = "";
-            output.text += $"<b>User:</b> {prompt}\n<b>Answer</b>: ";
+            output.text += $"<b>Action:</b> {prompt}\n<b>Result</b>: ";
             _previousText = output.text;
-
+            Debug.Log($"{manager} @");
             await manager.Prompt(prompt);
             output.text += "\n";
         }
 
         private void OnResponseHandler(string response)
         {
+            Debug.Log(response);
             output.text = _previousText + response;
+        }
+
+        public void UpdatePrompt(string prompt){
+            if (string.IsNullOrEmpty(prompt))
+                return;
+
+            input.text = "";
+            output.text += $"<b>Action:</b> {prompt}\n<b>Result</b>: ";
+            _previousText = output.text;
+            output.text += "\n";
+        }
+        public void UpdateOutputHandler(string response){
+            output.text = _previousText + response;
+            output.text += "\n";
         }
     }
 }
